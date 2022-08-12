@@ -1,7 +1,7 @@
 version: "3"
 services:
   spark-master:
-    image: spark-master:latest
+    image: bitnami/spark:3.3
     ports:
       - "4040:4040"
       - "9090:8080"
@@ -10,13 +10,14 @@ services:
        - ./apps:/opt/spark-apps
        - ./data:/opt/spark-data
     environment:
-      - "SPARK_LOCAL_IP=spark-master"
+      - SPARK_MODE=master
   spark-worker:
-    image: spark-worker:latest
+    image: bitnami/spark:3.3
     depends_on:
       - spark-master
     environment:
-      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=1G
       - SPARK_DRIVER_MEMORY=128m
