@@ -111,6 +111,34 @@ object DataSources extends App {
     * - table "public.movies" in the Postgres DB
     */
 
+  val moviesDF = spark.read
+    .json("src/main/resources/data/movies.json")
+
+  // CSV - tab-separated values file
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .option("header", true)
+    .option("sep", "\t")
+    .csv("src/main/resources/output/movies.csv")
+
+  // snappy Parquet
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .parquet("src/main/resources/output/movies.parquet")
+
+  // table "public.movies" in the Postgres DB
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "public.movies")
+    .save()
+
+  /* Solution
+
   val moviesDF = spark.read.json("src/main/resources/data/movies.json")
 
   // TSV
@@ -132,4 +160,6 @@ object DataSources extends App {
     .option("password", password)
     .option("dbtable", "public.movies")
     .save()
+
+   */
 }
