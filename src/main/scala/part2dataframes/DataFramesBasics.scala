@@ -87,6 +87,33 @@ object DataFramesBasics extends App {
     *   - count the number of rows, call count()
     */
 
+  // Exercise 1
+  val smartphones = Seq(
+    ("Apple", "iPhone 12", 6.1, 12.0),
+    ("Samsung", "Galaxy S22 Ultra", 6.8, 108.0),
+    ("Xiaomi", "Redmi Note 11", 6.43, 50.0)
+  )
+
+  val smartphonesDF = smartphones.toDF("make", "model", "screen_dimension", "camera_megapixels")
+  val smartphonesDF2 = spark.createDataFrame(smartphones)
+
+  smartphonesDF.show()
+  smartphonesDF.printSchema()
+
+  smartphonesDF2.show()
+  smartphonesDF2.printSchema()
+
+  // Exercise 2
+  val moviesDF = spark.read
+    .format("json")
+    .option("inferSchema", true)
+    .load("src/main/resources/data/movies.json")
+
+  moviesDF.printSchema()
+  println(s"Movies count: ${moviesDF.count()}")
+
+  /* Solutions
+
   // 1
   val smartphones = Seq(
     ("Samsung", "Galaxy S10", "Android", 12),
@@ -104,4 +131,6 @@ object DataFramesBasics extends App {
     .load("src/main/resources/data/movies.json")
   moviesDF.printSchema()
   println(s"The Movies DF has ${moviesDF.count()} rows")
+
+  */
 }
