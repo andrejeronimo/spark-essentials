@@ -90,6 +90,25 @@ object ColumnsAndExpressions extends App {
     * Use as many versions as possible
     */
 
+  // Exercise 1
+  val moviesDF = spark.read
+    .option("inferSchema", true)
+    .json("src/main/resources/data/movies.json")
+
+  val moviesTitleAndReleaseDateDF = moviesDF.select(col("Title"), col("Release_Date"))
+  moviesTitleAndReleaseDateDF.show()
+
+  // Exercise 2
+  val moviesWithTotalProfitDF = moviesDF.withColumn("Total_Profit", expr("coalesce(US_GROSS, 0) + coalesce(Worldwide_Gross, 0) + coalesce(US_DVD_Sales, 0)"))
+  moviesWithTotalProfitDF.show()
+
+  // Exercise 3
+  val comedyMoviesWithImdbRatingAbove6DF = moviesDF.filter('Major_Genre === "Comedy" and 'IMDB_Rating > 6)
+  comedyMoviesWithImdbRatingAbove6DF.show()
+
+
+  /* Solutions
+
   val moviesDF = spark.read.option("inferSchema", "true").json("src/main/resources/data/movies.json")
   moviesDF.show()
 
@@ -136,4 +155,6 @@ object ColumnsAndExpressions extends App {
     .where("Major_Genre = 'Comedy' and IMDB_Rating > 6")
 
   comediesDF3.show
+
+   */
 }
