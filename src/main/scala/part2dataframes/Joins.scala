@@ -72,6 +72,76 @@ object Joins extends App {
   val user = "docker"
   val password = "docker"
 
+  // Exercise 1
+  val employeesDF = spark.read
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "employees")
+    .load()
+
+  val salariesDF = spark.read
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "salaries")
+    .load()
+
+  val maxSalaryPerEmployeeDF = salariesDF
+    .groupBy("emp_no")
+    .agg(max("salary").as("max_salary"))
+
+  val employeesMaxSalaryDF = employeesDF
+    .join(maxSalaryPerEmployeeDF, "emp_no")
+
+  employeesMaxSalaryDF.show()
+
+  // Exercise 2
+  val managersDF = spark.read
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "dept_manager")
+    .load()
+
+  employeesDF
+    .join(managersDF, Seq("emp_no"), "left_anti")
+    .show()
+
+  // Exercise 3
+  val jobTitlesDF = spark.read
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "titles")
+    .load()
+
+  val mostRecentJobTitlesDF = jobTitlesDF
+    .groupBy("emp_no", "title")
+    .agg(max("to_date"))
+
+  val bestTenPaidEmployees = employeesMaxSalaryDF.orderBy(col("max_salary").desc).limit(10)
+
+  val jobTitlesOfTheBestPaidDF = bestTenPaidEmployees
+    .join(mostRecentJobTitlesDF, "emp_no")
+
+  jobTitlesOfTheBestPaidDF.show()
+
+  /* Solutions
+
+  val driver = "org.postgresql.Driver"
+  val url = "jdbc:postgresql://localhost:5432/rtjvm"
+  val user = "docker"
+  val password = "docker"
+
   def readTable(tableName: String) = spark.read
     .format("jdbc")
     .option("driver", driver)
@@ -103,5 +173,7 @@ object Joins extends App {
   val bestPaidJobsDF = bestPaidEmployeesDF.join(mostRecentJobTitlesDF, "emp_no")
 
   bestPaidJobsDF.show()
+
+   */
 }
 
