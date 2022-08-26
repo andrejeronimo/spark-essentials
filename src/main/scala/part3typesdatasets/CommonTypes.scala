@@ -75,6 +75,23 @@ object CommonTypes extends App {
 
   def getCarNames: List[String] = List("Volkswagen", "Mercedes-Benz", "Ford")
 
+  // Version 1 - regex
+  val carNamesRegex = getCarNames.map(_.toLowerCase).mkString("|")
+  carsDF
+    .where(regexp_extract(col("Name"), carNamesRegex, 0) =!= "")
+    .show()
+
+  // Version 2 - logical expression
+  val carNamesExp = getCarNames
+    .map(carName => col("Name").contains(carName.toLowerCase))
+    .reduce(_ or _)
+
+  carsDF
+    .where(carNamesExp)
+    .show()
+
+  /* Solutions
+
   // version 1 - regex
   val complexRegex = getCarNames.map(_.toLowerCase()).mkString("|") // volskwagen|mercedes-benz|ford
   carsDF.select(
@@ -88,5 +105,5 @@ object CommonTypes extends App {
   val bigFilter = carNameFilters.fold(lit(false))((combinedFilter, newCarNameFilter) => combinedFilter or newCarNameFilter)
   carsDF.filter(bigFilter).show
 
-
+  */
 }
