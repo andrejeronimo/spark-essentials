@@ -33,6 +33,23 @@ object ComplexTypes extends App {
     * 2. Read the stocks DF and parse the dates
     */
 
+  // Exercise 1
+  // Parse the dates multiple times, with the different formats that are used (in each iteration change only the dates
+  // that are still null).
+
+  // Exercise 2
+  val stocksDF = spark.read
+    .option("inferSchema", true)
+    .option("header", true)
+    .csv("src/main/resources/data/stocks.csv")
+
+  val stocksWithDatesDF = stocksDF
+    .withColumn("parsed_date", to_date(col("date"), "MMM d yyyy"))
+
+  stocksWithDatesDF.show()
+
+  /* Solutions
+
   // 1 - parse the DF multiple times, then union the small DFs
 
   // 2
@@ -43,6 +60,7 @@ object ComplexTypes extends App {
 
   val stocksDFWithDates = stocksDF
     .withColumn("actual_date", to_date(col("date"), "MMM dd yyyy"))
+  */
 
   // Structures
 
@@ -66,5 +84,4 @@ object ComplexTypes extends App {
     size(col("Title_Words")), // array size
     array_contains(col("Title_Words"), "Love") // look for value in array
   )
-
 }
