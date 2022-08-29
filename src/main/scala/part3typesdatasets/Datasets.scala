@@ -35,7 +35,7 @@ object Datasets extends App {
                 Horsepower: Option[Long],
                 Weight_in_lbs: Long,
                 Acceleration: Double,
-                Year: Date,
+                Year: String,
                 Origin: String
                 )
 
@@ -65,6 +65,27 @@ object Datasets extends App {
     * 3. Average HP for the entire dataset
     */
 
+  // Exercise 1
+  val carsCount = carsDS.count()
+  println(s"Cars count: $carsCount")
+
+  // Exercise 2
+  val powerfulCarsCount = carsDS
+    .filter(_.Horsepower.exists(_ > 140))
+    .count()
+  println(s"Powerful cars count: $powerfulCarsCount")
+
+  // Exercise 3 - Version 1
+  val carsHorsepower = carsDS.flatMap(_.Horsepower)
+  val avgHorsepower = carsHorsepower.reduce(_ + _) / carsHorsepower.count()
+  println(s"Average cars horsepower: $avgHorsepower")
+
+  // Exercise 3 - Version 2
+  carsDS
+    .select(avg(col("Horsepower")))
+    .show()
+
+  /* Solutions
   // 1
   val carsCount = carsDS.count
   println(carsCount)
@@ -77,6 +98,7 @@ object Datasets extends App {
 
   // also use the DF functions!
   carsDS.select(avg(col("Horsepower")))
+  */
 
 
   // Joins
@@ -99,6 +121,14 @@ object Datasets extends App {
     .joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
     .show()
 
+  /* Solution
+
+  guitarPlayersDS
+    .joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+    .show()
+
+  */
+
   // Grouping DS
 
   val carsGroupedByOrigin = carsDS
@@ -107,5 +137,4 @@ object Datasets extends App {
     .show()
 
   // joins and groups are WIDE transformations, will involve SHUFFLE operations
-
 }
