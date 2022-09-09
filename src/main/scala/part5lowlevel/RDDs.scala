@@ -103,6 +103,40 @@ object RDDs extends App {
 
   case class Movie(title: String, genre: String, rating: Double)
 
+  // Exercise 1
+  val moviesDF = spark.read
+    .option("inferSchema", true)
+    .json("src/main/resources/data/movies.json")
+
+  val moviesRDD = moviesDF
+    .select(col("Title").as("title"), col("Major_Genre").as("genre"), col("IMDB_Rating").as("rating"))
+    .where(col("genre").isNotNull and col("rating").isNotNull)
+    .as[Movie]
+    .rdd
+
+  moviesRDD.foreach(println)
+
+  // Exercise 2
+  val distinctGenresRDD = moviesRDD
+    .map(_.genre)
+    .distinct()
+
+  distinctGenresRDD.foreach(println)
+
+  // Exercise 3
+  val dramaMoviesRatedMoreThan6RDD = moviesRDD
+    .filter(movie => movie.genre == "Drama" && movie.rating > 6)
+
+  dramaMoviesRatedMoreThan6RDD.foreach(println)
+
+  // Exercise 4
+  val averageRatingPerGenreRDD = moviesRDD
+    .groupBy(_.genre)
+    .mapValues(genreMovies => genreMovies.map(_.rating).sum / genreMovies.size)
+
+  averageRatingPerGenreRDD.foreach(println)
+
+  /* Solutions
   // 1
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -129,6 +163,7 @@ object RDDs extends App {
 
   avgRatingByGenreRDD.toDF.show
   moviesRDD.toDF.groupBy(col("genre")).avg("rating").show
+  */
 }
 
 /*
