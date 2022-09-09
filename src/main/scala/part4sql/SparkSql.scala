@@ -15,7 +15,7 @@ object SparkSql extends App {
 
   val carsDF = spark.read
     .option("inferSchema", "true")
-    .json("src/main/resources/data/cars.json")
+     .json("src/main/resources/data/cars.json")
 
   // regular DF API
   carsDF.select(col("Name")).where(col("Origin") === "USA")
@@ -79,6 +79,72 @@ object SparkSql extends App {
     * 4. Show the name of the best-paying department for employees hired in between those dates.
     */
 
+  // Exercise 1
+  val moviesDF = spark.read
+    .option("inferSchema", true)
+    .json("src/main/resources/data/movies.json")
+
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .saveAsTable("movies")
+
+  // Exercise 2
+  val employeesDF = readTable("employees")
+  employeesDF.createOrReplaceTempView("employees")
+
+  spark.sql(
+    """
+      |SELECT count(*)
+      |FROM employees
+      |WHERE
+      | hire_date > '1999-01-01' AND
+      | hire_date < '2000-01-01'
+      |""".stripMargin
+  ).show()
+
+  // Exercise 3
+  val salariesDF = readTable("salaries")
+  salariesDF.createOrReplaceTempView("salaries")
+
+  val deptEmpDF = readTable("dept_emp")
+  deptEmpDF.createOrReplaceTempView("dept_emp")
+
+  spark.sql(
+    """
+      |SELECT dept_no, avg(salary)
+      |FROM
+      | employees e JOIN
+      | salaries s ON e.emp_no = s.emp_no JOIN
+      | dept_emp de ON e.emp_no = de.emp_no
+      |WHERE
+      | hire_date >= '1999-01-01' AND
+      | hire_date < '2000-01-01'
+      |GROUP BY dept_no
+      |""".stripMargin)
+    .show()
+
+  // Exercise 4
+  val departmentsDF = readTable("departments")
+  departmentsDF.createOrReplaceTempView("departments")
+
+  spark.sql(
+    """
+      |SELECT dept_name, avg(salary) AS avg_salary
+      |FROM
+      | employees e JOIN
+      | salaries s ON e.emp_no = s.emp_no JOIN
+      | dept_emp de ON e.emp_no = de.emp_no JOIN
+      | departments d ON de.dept_no = d.dept_no
+      |WHERE
+      | hire_date >= '1999-01-01' AND
+      | hire_date < '2000-01-01'
+      |GROUP BY dept_name
+      |ORDER BY avg_salary DESC
+      |LIMIT 1
+      |""".stripMargin)
+    .show()
+
+  /* Solutions
   // 1
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -123,4 +189,8 @@ object SparkSql extends App {
       |limit 1
     """.stripMargin
   ).show()
+
+  */
+
+
 }
